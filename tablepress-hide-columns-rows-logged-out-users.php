@@ -57,22 +57,26 @@ function tablepress_add_shortcode_parameter_hide_role( $default_atts ) {
  */
 function tablepress_render_columns_from_user_role( $render_options, $table ) {
 
-    // var_dump($render_options);
-
     $editable_roles = tablepress_get_editable_roles();
+    $current_user_role = tablepress_get_current_user_role();
+
     foreach( $editable_roles as $role => $roleArray ) {
 
-        $render_options = render_helper($render_options, 'hide', 'columns', $role);
-        $render_options = render_helper($render_options, 'hide', 'rows', $role);
-        $render_options = render_helper($render_options, 'show', 'columns', $role);
-        $render_options = render_helper($render_options, 'show', 'rows', $role);
+        if($role == $current_user_role) {
 
+            $render_options = render_helper($render_options, 'hide', 'columns', $role);
+            $render_options = render_helper($render_options, 'hide', 'rows', $role);
+            $render_options = render_helper($render_options, 'show', 'columns', $role);
+            $render_options = render_helper($render_options, 'show', 'rows', $role);
+
+        }
     }
 
 	return $render_options;
 }
 
 function render_helper($render_options, $hide_show, $row_col, $role) {
+
     if ( ! empty( $render_options[$hide_show .'_'. $row_col .'_'. $role] ) ) {
         if ( empty( $render_options[$hide_show .'_'. $row_col] ) ) {
             $render_options[$hide_show .'_'. $row_col] = $render_options[$hide_show .'_'. $row_col .'_'. $role];
@@ -82,4 +86,15 @@ function render_helper($render_options, $hide_show, $row_col, $role) {
     }
 
     return $render_options;
+}
+
+function tablepress_get_current_user_role() {
+
+    if( is_user_logged_in() ) {
+        $user = wp_get_current_user();
+        $role = ( array ) $user->roles;
+        return $role[0];
+    } else {
+        return false;
+    }
 }
